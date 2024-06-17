@@ -1,0 +1,7 @@
+git log
+git status
+git add .
+git commit -am "หตร๗"
+git branch -m master main
+git remote add origin git@github.com:sgygp/H7_60kFFT_git.git
+git push origin main
