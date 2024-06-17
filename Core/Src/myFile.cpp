@@ -238,7 +238,7 @@ u8 MyFile::getFileADzhi(char *filename) {
 	res=f_lseek(&fil, 4096);
 	if(fil.fptr!=4096)
 		return -1;
-	for(int i=0;i<16;i++)
+	for(int i=0;i<nFFT*2/4096;i++)
 	{
 		res=f_read(&fil, &adcData[2048*i], 4096, &bw);
 		if(bw!=4096)

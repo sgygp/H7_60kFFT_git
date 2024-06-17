@@ -8,7 +8,7 @@
 #include "OW25Qxx.h"
 #include "string.h"
 OSPI_HandleTypeDef OW25Qxx::hospi1;
-u32 OW25Q_Sector_Count;
+u32 OW25Q_Sector_Count=0;
 
 void OW25Qxx::init()
 {
@@ -92,9 +92,11 @@ void OW25Qxx::init()
 	b&=0x0f;;//0X13对应1M字节，0x14:2M,0x15:4M,0x16:8M,0x17:16M,0x18:32M,
 	a=(0x100000<<(b-3));//兆字节
 	a/=512;//除以512,转为扇区
+	if(a>1024)
+		a-=1024;
 
 
-	OW25Q_Sector_Count=a-1024;
+	OW25Q_Sector_Count=a;
 	bMapped=false;
 
 
@@ -248,6 +250,12 @@ uint8_t OW25Qxx::WriteBuffer(uint8_t *_pBuf, uint32_t _uiWriteAddr, uint16_t _us
  */
 u8 OW25Qxx::ReadBuffer(uint8_t * _pBuf, uint32_t _uiReadAddr, uint32_t _uiSize)
 {
+	u8 a=0;
+	if( _uiReadAddr>=OW25Q_Sector_Count*512)
+	{
+		a=1;
+		return a;
+	}
 
 	OSPI_RegularCmdTypeDef sCommand;
 	memset(&sCommand,0,sizeof(sCommand));
@@ -276,7 +284,9 @@ u8 OW25Qxx::ReadBuffer(uint8_t * _pBuf, uint32_t _uiReadAddr, uint32_t _uiSize)
 
 	if (HAL_OSPI_Command(&hospi1, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
 	{
+		a=2;
 		Error_Handler();
+		return a;
 	}
 
 	/* 读取 */
